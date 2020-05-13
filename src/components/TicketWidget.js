@@ -1,33 +1,46 @@
 import React from 'react';
 import styled from 'styled-components';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Tippy from '@tippyjs/react';
+import { SeatContext } from './SeatContext';
+import seatAvailable from '../assets/seat-available.svg';
+import Seat from './Seat';
 
 import { getRowName, getSeatNum } from '../helpers';
 import { range } from '../utils';
 
 const TicketWidget = () => {
-  // TODO: use values from Context
-  const numOfRows = 6;
-  const seatsPerRow = 6;
+  const {
+    state: { hasLoaded, numOfRows, seatsPerRow, seats },
+  } = React.useContext(SeatContext);
 
   // TODO: implement the loading spinner <CircularProgress />
   // with the hasLoaded flag
+  while (!hasLoaded) {
+    return (
+      <>
+        <CircularProgress></CircularProgress>
+        <span>Loading seat data. Please wait.</span>
+      </>
+    );
+  }
 
   return (
     <Wrapper>
-      {range(numOfRows).map(rowIndex => {
+      {range(numOfRows).map((rowIndex) => {
         const rowName = getRowName(rowIndex);
 
         return (
           <Row key={rowIndex}>
             <RowLabel>Row {rowName}</RowLabel>
-            {range(seatsPerRow).map(seatIndex => {
+            {range(seatsPerRow).map((seatIndex) => {
               const seatId = `${rowName}-${getSeatNum(seatIndex)}`;
-
               return (
-                <SeatWrapper key={seatId}>
-                  {/* TODO: Render the actual <Seat /> */}
-                </SeatWrapper>
+                <Seat
+                  key={`${seatId}-${seatIndex}`}
+                  seatId={seatId}
+                  seats={seats}
+                />
               );
             })}
           </Row>
@@ -55,10 +68,6 @@ const Row = styled.div`
 
 const RowLabel = styled.div`
   font-weight: bold;
-`;
-
-const SeatWrapper = styled.div`
-  padding: 5px;
 `;
 
 export default TicketWidget;
